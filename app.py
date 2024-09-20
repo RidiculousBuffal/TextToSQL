@@ -1,6 +1,6 @@
 import asyncio
 
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.llm.DefaultLLM import default_chat
@@ -46,3 +46,7 @@ async def websocket_endpoint(websocket: WebSocket):
         await websocket.close()
     except WebSocketDisconnect:
         print("Connection Closed")
+
+@app.post("/uploadTable")
+async def uploadTable(file:UploadFile):
+    pass

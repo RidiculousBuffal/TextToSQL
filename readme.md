@@ -41,6 +41,7 @@ yarn dev
 可以替换相关的 Prompt 在: [Prompt.py](backend%2FConst%2FPrompt.py)
 
 ```bash
+pip install -r 'requirements.txt'
 python.exe -m uvicorn app:app --reload 
 ```
 
