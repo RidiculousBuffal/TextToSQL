@@ -2,9 +2,11 @@ from backend.connector.getTableDDL import getTableDDLAsString
 from backend.llm.getLLM import getLLM
 from backend.Const.structedOutPut import ExtractQuery
 from backend.Const.Prompt import Prompt
+from backend.models.DatabaseConnector import DBConnector
 
-def ExtractQuestion(userQuery: str, dataBaseName: str):
-    DDL = getTableDDLAsString(dataBaseName)
+
+def ExtractQuestion(userQuery: str, dbconnector:DBConnector):
+    DDL = getTableDDLAsString(dbconnector)
     client = getLLM()
     resp = client.beta.chat.completions.parse(
         model='gpt-4o-mini',

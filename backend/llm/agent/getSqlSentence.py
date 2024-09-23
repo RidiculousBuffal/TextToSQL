@@ -1,8 +1,11 @@
 from backend.llm.getLLM import getLLM
 from backend.Const.Prompt import Prompt
 from backend.connector.getTableDDL import getTableDDLAsString
-async def getSQLSentence(userQuery: str, dataBaseName: str):
-    DDL = getTableDDLAsString(dataBaseName)
+from backend.models.DatabaseConnector import DBConnector
+
+
+async def getSQLSentence(userQuery: str, dbconnector:DBConnector):
+    DDL = getTableDDLAsString(dbconnector)
     client = getLLM()
     stream = client.chat.completions.create(
         model='gpt-4o-mini',

@@ -1,5 +1,6 @@
 from sqlalchemy import inspect, text
 from backend.connector.getEngine import getEngine
+from backend.models.DatabaseConnector import DBConnector
 
 
 def get_table_ddl(connection, table_name):
@@ -35,9 +36,9 @@ def get_table_ddl(connection, table_name):
     return ddl
 
 
-def getTableDDLAsString(database: str):
+def getTableDDLAsString(dbConnector:DBConnector):
     res = ''
-    engine = getEngine(database)
+    engine = getEngine(dbConnector)
     try:
         with engine.connect() as connection:
             result = connection.execute(text("SHOW TABLES;"))

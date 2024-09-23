@@ -3,11 +3,12 @@ from ast import literal_eval
 from starlette.websockets import WebSocket
 
 from backend.connector.getEngine import getEngine
+from backend.models.DatabaseConnector import DBConnector
 from backend.models.Result import Result
 from sqlalchemy import text
-def execute_query(query: str, database: str) -> Result:
+def execute_query(query: str, dbConnector: DBConnector) -> Result:
     # 获取数据库引擎
-    engine = getEngine(database)
+    engine = getEngine(dbConnector)
 
     # 使用数据库引擎执行查询
     with engine.connect() as connection:
