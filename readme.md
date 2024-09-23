@@ -11,6 +11,11 @@
   ![Snipaste_2024-09-20_15-41-20.png](pic%2FSnipaste_2024-09-20_15-41-20.png)  
   ![Snipaste_2024-09-20_15-41-24.png](pic%2FSnipaste_2024-09-20_15-41-24.png)
 
+
+- 上传本地Excel\CSV可以自动转化成SQL表格 📊 支持对话
+![Snipaste_2024-09-23_13-33-10.png](pic%2FSnipaste_2024-09-23_13-33-10.png)
+![img.png](pic%2Fimg.png)
+![img_1.png](pic%2Fimg_1.png)
 - **前端支持流式输出** 🌊
 
 - **基本的UI样式** 🎨
@@ -48,5 +53,5 @@ python.exe -m uvicorn app:app --reload
 ## 📝 TODO
 - 优化UI ✨
 - 现在没有记忆功能，可以考虑本地存储聊天记录 💾
-- 支持上传 CSV 文件转换为 SQL 之后再解析 📁
+- 支持上传 CSV 文件转换为 SQL 之后再解析 📁 **(已经实现)**
 - 在数据量不大的情况下，增加一个保底措施即把所有数据都查出来 `select *` 然后再去问 🔍

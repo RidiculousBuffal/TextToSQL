@@ -1,16 +1,21 @@
 import asyncio
+import re
+from datetime import datetime
 
-from fastapi import FastAPI, UploadFile
+import pandas as pd
+from fastapi import FastAPI, UploadFile,File, Depends,Form
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.datastructures import FormData
 
 from backend.llm.DefaultLLM import default_chat
-from backend.models.DatabaseConnector import DBConnector
-from backend.connector.getEngine import checkConnection
+from backend.models.DatabaseConnector import DBConnector, ExtendedDBConnector
+from backend.connector.getEngine import checkConnection, getEngine
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from backend.llm.chatWithSQL import getSQL
 from backend.connector.excutorQuery import execute_query
 from backend.llm.Response import DefaultLLMResponse
 from backend.models.Result import Result
+from io import StringIO, BytesIO
 
 # 创建 FastAPI 应用
 app = FastAPI()
@@ -23,7 +28,14 @@ app.add_middleware(
     allow_methods=["*"],  # 允许所有方法
     allow_headers=["*"],   # 允许所有请求头
 )
-
+def clean_table_name(filename: str) -> str:
+    # 去掉文件扩展名并替换不合法字符
+    table_name = filename.split('.')[0]  # 去掉扩展名
+    table_name = re.sub(r'\W+', '_', table_name)  # 替换非字母数字字符为下划线
+    now = datetime.now()
+    # 格式化时间为字符串
+    timestamp_str = now.strftime('%Y-%m-%d %H:%M:%S')
+    return table_name+timestamp_str
 @app.post("/checkDB")
 async def checkDB(payload: DBConnector):
     return checkConnection(payload)
@@ -34,10 +46,11 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         data = await websocket.receive_json()
         print(data)
-        sql_array = await getSQL(userQuery=data['userQuery'],dataBaseName=data['databaseName'],ws=websocket)
+        dbConnectorPayload = DBConnector(**data['dbConnector'])
+        sql_array = await getSQL(userQuery=data['userQuery'],dbconnector=dbConnectorPayload,ws=websocket)
         payloads = []
         for sql in sql_array:
-            tmpResult = execute_query(query=sql,database=data['databaseName'])
+            tmpResult = execute_query(query=sql,dbConnector=dbConnectorPayload)
             await websocket.send_json(tmpResult.model_dump_json())
             payloads.append(tmpResult.payload)
         stream = await default_chat(user_query=data['userQuery'],prompt=f"根据数据库查询内容回答问题:{str(payloads)}")
@@ -48,5 +61,23 @@ async def websocket_endpoint(websocket: WebSocket):
         print("Connection Closed")
 
 @app.post("/uploadTable")
-async def uploadTable(file:UploadFile):
-    pass
+async def uploadTable(payload:ExtendedDBConnector=Form(...)):
+    df = None
+    try:
+        contents = await payload.file.read()
+        if payload.file.filename.endswith('csv'):
+            df = pd.read_csv(StringIO(contents.decode('utf-8')))
+        else:
+            df = pd.read_excel(BytesIO(contents))
+        table_name = clean_table_name(filename=payload.file.filename)
+        engine = getEngine(payload)
+        try:
+            for col in df.select_dtypes(include=['object']).columns:
+                df[col] = df[col].str.encode('utf-8').str.decode('utf-8')
+            df.to_sql(table_name.lower(), engine, index=False, if_exists='replace')
+        except Exception as e:
+            print(e)
+            return Result(status=0,message='建表失败',payload=None)
+    except Exception as e:
+        return Result(status=0,message=str(e),payload=None)
+    return Result(status=1,message='成功',payload=None)

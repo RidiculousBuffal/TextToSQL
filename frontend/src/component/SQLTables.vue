@@ -1,17 +1,27 @@
 <script lang="ts" setup>
 import {ref} from "vue";
-import {checkDBConnection} from "../../api/db";
+import {checkDBConnection, uploadFile} from "@/api/db";
 import {DBToken} from "@/store/DBToken";
 import DBConnector from "@/typeutils/DBConnector";
-import {ElNotification} from "element-plus";
 import {MyNotification} from "@/utils/Notification";
+import type {UploadInstance, UploadUserFile} from "element-plus";
+import {areAllPropertiesDefined} from "@/utils/someTools";
 
 const DBS = ref<string[]>([]);
 const loading = ref(false);
 const step = ref<number>(1);
 const formValue = ref<DBConnector>({});
+const uploadRef = ref<UploadInstance>()
+const fileList = ref<UploadUserFile>([])
 const dbTokenStore = DBToken();
-
+// 控制弹窗的打开状态
+const dialogOpen = ref(false);
+// 用户选择的数据库类型
+const databaseChoice = ref('existing'); // 默认选择现有数据库
+// 选择的现有数据库
+const selectedDB = ref('');
+// 新建数据库的名称
+const newDBName = ref('');
 const connectToDatabase = async () => {
   loading.value = true;
   const result = await checkDBConnection(formValue.value);
@@ -43,7 +53,44 @@ const checkWhenStart = async () => {
     }
   }
 };
+const openFileUpload =  ()=>{
+  dialogOpen.value = true
+
+}
 checkWhenStart();
+
+
+const submitUpload = async() => {
+  const token: DBConnector = dbTokenStore.DBToken
+
+  if (fileList.value.length===0|| !areAllPropertiesDefined(token)) {
+    MyNotification('error', '参数缺失', 'error')
+    return;
+  } else {
+    const file = fileList.value[0].raw
+    const formData = new FormData()
+    // 遍历 token 对象的属性并添加到 formData
+    // 将 token 对象的属性添加到 formData 中
+    for (const key in token) {
+      if (Object.prototype.hasOwnProperty.call(token, key)) {
+        formData.append(key, token[key]);
+      }
+    }
+    formData.append('file',file)
+    const res = await uploadFile(formData)
+    if (res.status=='1'){
+      MyNotification('success',res.message,res.message)
+      uploadRef.value?.clearFiles()
+      const result = await checkDBConnection(dbTokenStore.DBToken);
+      DBS.value = result.payload
+    }else{
+      MyNotification('error',res.message,res.message)
+    }
+    dialogOpen.value = false;
+  }
+
+
+}
 </script>
 
 <template>
@@ -72,6 +119,7 @@ checkWhenStart();
           </el-form-item>
         </el-form>
       </div>
+
     </div>
   </Transition>
   <Transition name="slide-fade">
@@ -96,8 +144,53 @@ checkWhenStart();
           />
         </el-select>
       </div>
+      <div class="addfile">
+        <el-button @click="dialogOpen=true">UPLOAD CSV/XLSX FILE</el-button>
+      </div>
+
     </div>
   </Transition>
+  <el-dialog v-model="dialogOpen" title="上传文件" width="500px">
+    <div>
+      <el-radio-group v-model="databaseChoice">
+        <el-radio label="existing">从现有数据库上传</el-radio>
+        <el-radio label="new">新建一个数据库上传</el-radio>
+      </el-radio-group>
+
+      <div v-if="databaseChoice === 'existing'">
+        <el-select v-model="selectedDB" placeholder="请选择数据库">
+          <el-option
+              v-for="db in DBS"
+              :key="db"
+              :label="db"
+              :value="db"
+              @change="onhandleChange"
+          />
+        </el-select>
+      </div>
+
+      <div v-if="databaseChoice === 'new'">
+        <el-input @change="onhandleChange" v-model="newDBName" placeholder="请输入数据库名称"></el-input>
+      </div>
+
+      <el-upload
+          ref="uploadRef"
+          class="upload-demo"
+          drag
+          :auto-upload="false"
+          :limit=1
+          v-model:file-list="fileList"
+          accept=".csv,.xlsx"
+      >
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+      </el-upload>
+      <el-button class="ml-3" type="success" @click="submitUpload">
+        upload to server
+      </el-button>
+
+    </div>
+  </el-dialog>
 </template>
 
 <style lang="scss" scoped>
@@ -192,5 +285,13 @@ checkWhenStart();
 .slide-fade-enter-from {
   transform: translateX(20px);
   opacity: 0;
+}
+
+.addfile {
+  margin: 10px;
+}
+
+.upload-demo {
+  margin: 20px 0;
 }
 </style>

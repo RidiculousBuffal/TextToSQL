@@ -6,22 +6,13 @@ import {MyNotification} from "@/utils/Notification";
 import {areAllPropertiesDefined} from "@/utils/someTools";
 import type DBConnector from "@/typeutils/DBConnector";
 import {DBToken} from "@/store/DBToken";
-import baseWebSocket from "@/request/BaseWebSocket";
+import baseWebSocket, {sendWebSocket} from "@/request/BaseWebSocket";
 import {SQLworkflow} from "@/workflow/SQLWorkFlow";
 // 示例消息数据
 const messages = ref<Array<ChatModel>>([]);
 
 const userInput = ref("");
-const wsServer = baseWebSocket('/chatWithSQL')
-wsServer.addEventListener('message', (event) => {
-      const data_ = JSON.parse(JSON.parse(event.data))
-      SQLworkflow(data_, messages)
-    }
-);
-wsServer.addEventListener('close', (event) => {
-  MyNotification("success", '本次对话结束', "Over")
-  wsServer.close()
-})
+
 type databaseSend = {
   userQuery: string,
   databaseName: string
@@ -36,13 +27,20 @@ const sendMessage = () => {
       content: userInput.value
     }
     if (areAllPropertiesDefined(dbtoken)) {
+
       messages.value.push(userMessage);
       userInput.value = '';
       const send: databaseSend = {
         userQuery: userMessage.content,
-        databaseName: dbtoken.DB_NAME
+        dbConnector: dbtoken
       }
-      wsServer.send(JSON.stringify(send))
+      const wsServer = baseWebSocket('/chatWithSQL', (event) => {
+        const data_ = JSON.parse(JSON.parse(event.data))
+        SQLworkflow(data_, messages)
+      }, (event) => {
+        MyNotification('success', '本次对话结束', 'Over')
+      }, null, null)
+      sendWebSocket(wsServer, send)
       messages.value.push({role: 'assistant', 'content': ''})
     } else {
       MyNotification("error", "请先连接到数据库并选择database", "出错啦!")
