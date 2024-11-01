@@ -12,10 +12,12 @@ import {SQLworkflow} from "@/workflow/SQLWorkFlow";
 const messages = ref<Array<ChatModel>>([]);
 
 const userInput = ref("");
+import {AiSearchState} from "@/store/AiSearch";
 
 type databaseSend = {
   userQuery: string,
-  databaseName: string
+  databaseName: string,
+  AiSearch: boolean
 }
 
 const sendMessage = () => {
@@ -32,7 +34,8 @@ const sendMessage = () => {
       userInput.value = '';
       const send: databaseSend = {
         userQuery: userMessage.content,
-        dbConnector: dbtoken
+        dbConnector: dbtoken,
+        AiSearch:AiSearchState().state
       }
       const wsServer = baseWebSocket('/chatWithSQL', (event) => {
         const data_ = JSON.parse(JSON.parse(event.data))

@@ -6,6 +6,8 @@ import DBConnector from "@/typeutils/DBConnector";
 import {MyNotification} from "@/utils/Notification";
 import type {UploadInstance, UploadUserFile} from "element-plus";
 import {areAllPropertiesDefined} from "@/utils/someTools";
+import {AiSearchState} from "@/store/AiSearch";
+import {Hide, View} from "@element-plus/icons-vue"
 
 const DBS = ref<string[]>([]);
 const loading = ref(false);
@@ -53,17 +55,17 @@ const checkWhenStart = async () => {
     }
   }
 };
-const openFileUpload =  ()=>{
+const openFileUpload = () => {
   dialogOpen.value = true
 
 }
 checkWhenStart();
 
 
-const submitUpload = async() => {
+const submitUpload = async () => {
   const token: DBConnector = dbTokenStore.DBToken
 
-  if (fileList.value.length===0|| !areAllPropertiesDefined(token)) {
+  if (fileList.value.length === 0 || !areAllPropertiesDefined(token)) {
     MyNotification('error', '参数缺失', 'error')
     return;
   } else {
@@ -76,20 +78,25 @@ const submitUpload = async() => {
         formData.append(key, token[key]);
       }
     }
-    formData.append('file',file)
+    formData.append('file', file)
     const res = await uploadFile(formData)
-    if (res.status=='1'){
-      MyNotification('success',res.message,res.message)
+    if (res.status == '1') {
+      MyNotification('success', res.message, res.message)
       uploadRef.value?.clearFiles()
       const result = await checkDBConnection(dbTokenStore.DBToken);
       DBS.value = result.payload
-    }else{
-      MyNotification('error',res.message,res.message)
+    } else {
+      MyNotification('error', res.message, res.message)
     }
     dialogOpen.value = false;
   }
 
 
+}
+const state = ref<boolean>()
+const AiState = AiSearchState()
+const AiStateSwitch = (newState) => {
+  AiState.setState(newState)
 }
 </script>
 
@@ -147,8 +154,14 @@ const submitUpload = async() => {
       <div class="addfile">
         <el-button @click="dialogOpen=true">UPLOAD CSV/XLSX FILE</el-button>
       </div>
-
+      <div class="operation" >
+        Enable AiSearch:
+        <el-switch v-model="state" :active-action-icon="View" :inactive-action-icon="Hide" @change="AiStateSwitch">
+        </el-switch>
+      </div>
     </div>
+
+
   </Transition>
   <el-dialog v-model="dialogOpen" title="上传文件" width="500px">
     <div>

@@ -1,3 +1,5 @@
+from typing import List
+
 from starlette.websockets import WebSocket
 
 from backend.llm.Response import DefaultLLMResponse
@@ -7,9 +9,9 @@ from backend.models.DatabaseConnector import DBConnector
 from backend.models.Result import Result
 
 
-async def getSQL(userQuery: str, dbconnector:DBConnector, ws: WebSocket):
+async def getSQL(userQuery: str, dbconnector:DBConnector, ws: WebSocket,extractedList:List):
     # 分解问题
-    extractedList = ExtractQuestion(userQuery=userQuery, dbconnector=dbconnector)
+
     await ws.send_json(Result(status="1", message="转化问题", payload=f"{extractedList}").model_dump_json())
     res = []
     for q in extractedList:

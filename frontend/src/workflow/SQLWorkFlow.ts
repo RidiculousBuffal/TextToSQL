@@ -23,14 +23,14 @@ const steps = ['转化问题','自然语言转化','解析到SQL语句','SQL查�
 export function SQLworkflow(data:Result<typeof steps[number]>,messages:Ref<Array<ChatModel>>){
 //     第一步 转化问题
     if(data.message=='转化问题'){
-        messages.value[messages.value.length-1].content = messages.value[messages.value.length-1].content + "# 转化问题\n"
+        messages.value[messages.value.length-1].content = messages.value[messages.value.length-1].content + "## 转化问题\n"
         for (value in data.payload){
             messages.value[messages.value.length-1].content = messages.value[messages.value.length-1].content + `- ${value}\n`
         }
 
     }
     else if (data.message=='自然语言转化'){
-         messages.value[messages.value.length-1].content = messages.value[messages.value.length-1].content+`\n # 对子问题${data.payload}的SQL处理 \n`
+         messages.value[messages.value.length-1].content = messages.value[messages.value.length-1].content+`\n ## 对子问题${data.payload}的SQL处理 \n`
     }
     else if (data.message == '解析到SQL语句'){
          messages.value[messages.value.length-1].content = messages.value[messages.value.length-1].content+`${data.payload}`

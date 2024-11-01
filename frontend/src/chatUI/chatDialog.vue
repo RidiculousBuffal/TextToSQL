@@ -48,6 +48,7 @@ const isUser = computed(() => props.role === 'user');
     padding: 10px;
     border-radius: 8px;
     max-width: 70%; // 控制消息内容的最大宽度
+    overflow: auto;
     word-wrap: break-word; // 处理长单词换行
   }
 
