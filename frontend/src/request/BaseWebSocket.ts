@@ -1,7 +1,7 @@
 import type {AllowedEndpoint} from "@/typeutils/availableEndPoint";
 const BASE_URL = import.meta.env.VITE_APP_BACKEND_URL
 export default function (endpoint:AllowedEndpoint,messageFunc:(event:MessageEvent)=>{},closeFunc:(event:CloseEvent)=>{},openFunc:(event:Event)=>{},errorFunc:(event:Event)=>{}){
-    const websocket =  new WebSocket(`ws://${BASE_URL}${endpoint}`)
+    const websocket =  new WebSocket(`wss://${BASE_URL}${endpoint}`)
     websocket.addEventListener('message',messageFunc)
     websocket.addEventListener('close',closeFunc)
     websocket.addEventListener('open',openFunc)
