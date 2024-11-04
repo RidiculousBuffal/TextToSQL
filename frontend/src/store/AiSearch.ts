@@ -1,6 +1,6 @@
 import {defineStore} from "pinia";
 import {ref} from 'vue'
-
+//@ts-ignore
 export const AiSearchState = defineStore('AiSearch', () => {
     const state = ref<boolean>(false)
     const setState = (newstate: boolean) => {

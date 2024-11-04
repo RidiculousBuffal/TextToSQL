@@ -2,7 +2,7 @@
 import {ref} from "vue";
 import {checkDBConnection, uploadFile} from "@/api/db";
 import {DBToken} from "@/store/DBToken";
-import DBConnector from "@/typeutils/DBConnector";
+import type DBConnector from "@/typeutils/DBConnector";
 import {MyNotification} from "@/utils/Notification";
 import type {UploadInstance, UploadUserFile} from "element-plus";
 import {areAllPropertiesDefined} from "@/utils/someTools";
