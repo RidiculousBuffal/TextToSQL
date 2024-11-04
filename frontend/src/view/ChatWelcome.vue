@@ -2,7 +2,8 @@
   <div class="welcome-container">
     <img :src="logoUrl" alt="Logo" class="logo" />
     <h1 class="welcome-title">Welcome to LLM toolbox!</h1>
-    <button class="experience-button" @click="handleExperienceClick">立即体验</button>
+    <button class="experience-button" @click="handleExperienceClick">SQL 工具箱</button>
+    <button class="experience-button" @click="handleDify">Dify 应用展示</button>
   </div>
 </template>
 
@@ -16,6 +17,9 @@ const router = useRouter()
 const handleExperienceClick = () => {
   router.push('/chat')
 };
+const handleDify = ()=>{
+  router.push('/dify')
+}
 import {userToken} from "@/store/UserToken";
 // 判断是不是第一次进入
 const useUserToken = userToken()
