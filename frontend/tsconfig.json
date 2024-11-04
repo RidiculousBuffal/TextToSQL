@@ -8,7 +8,9 @@
       "path": "./tsconfig.app.json"
     }
   ],
-   "compilerOptions": {
+  "compilerOptions": {
+    "noEmitOnError": false,
+    "skipLibCheck": true,
     "types": [
       "pinia-plugin-persist"
     ]

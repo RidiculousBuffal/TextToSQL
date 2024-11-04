@@ -2,7 +2,7 @@ import ins from '@/request/request'
 import type DBConnector from "../typeutils/DBConnector";
 import type Result from "@/typeutils/Result";
 
-export const checkDBConnection = async (payload: DBConnector): Promise<Result> => {
+export const checkDBConnection = async (payload: DBConnector): Promise<Result<string>> => {
     try {
         return await ins.post('/checkDB', payload); // 返回响应数据
     } catch (error) {
@@ -10,7 +10,7 @@ export const checkDBConnection = async (payload: DBConnector): Promise<Result> =
         throw error;
     }
 }
-export const uploadFile = async (payload: FormData): Promise<Result> => {
+export const uploadFile = async (payload: FormData): Promise<Result<string>> => {
     try {
         console.log(payload)
         return await ins.post('/uploadTable', payload, {

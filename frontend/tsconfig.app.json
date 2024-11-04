@@ -9,6 +9,9 @@
     "src/**/__tests__/*"
   ],
   "compilerOptions": {
+    "types": [
+      "pinia-plugin-persist"
+    ],
     "composite": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "noEmitOnError": false,
