@@ -16,7 +16,7 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "types": [
-      "node","pinia-plugin-persist"
+      "node"
     ]
   }
 }
